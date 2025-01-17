@@ -8,9 +8,12 @@ class Game{
         this.cellSize=50;
         this.columns;
         this.rows;
+        this.topMargin=2;
         this.eventTimer=0;
         this.eventInterval=200;
         this.eventUpdate=false;
+        this.gameOver=true;
+        this.winningScore=2;
 
         // this.resize(window.innerWidth, window.innerHeight);
 
@@ -19,7 +22,9 @@ class Game{
         this.player3;
         this.player4;
         this.food;
+        this.background;
         this.gameObjects;
+        this.gameUi=new Ui(this)
 
         window.addEventListener('resize',e=>{
             this.resize(e.currentTarget.innerWidth,e.currentTarget.innerHeight);
@@ -37,13 +42,18 @@ class Game{
         this.height=this.canvas.height;
         this.columns=Math.floor(this.width/this.cellSize);
         this.rows=Math.floor(this.height/this.cellSize);
-
-        this.player1=new Keyboard1(this,0,0,1,0,'magenta');
-        this.player2=new ComputerAi(this,this.columns-1,0,0,1,'orangered');
-        this.player3=new ComputerAi(this,this.columns-1,this.rows-1,-1,0,'yellow');
-        this.player4=new ComputerAi(this,0,this.rows-1,0,-1,'darkblue');
+        this.background=new Background(this);
+        
+    }
+    start(){
+        this.gameOver=false;
+        this.player1=new Keyboard1(this,0,this.topMargin,1,0,'magenta','Frank');
+        this.player2=new ComputerAi(this,this.columns-1,this.topMargin,0,1,'orangered','Player2');
+        this.player3=new ComputerAi(this,this.columns-1,this.rows-1,-1,0,'yellow','Computer AI');
+        this.player4=new ComputerAi(this,0,this.rows-1,0,-1,'darkblue','Computer AI');
         this.food=new Food(this);
         this.gameObjects=[this.player1,this.player2,this.player3,this.player4,this.food];
+
     }
     drawGrid(){
         for(let y=0;y<this.rows;y++)
@@ -54,12 +64,7 @@ class Game{
         }
         
     }
-    drawStatusText(){
-        this.ctx.fillText('P1: '+this.player1.score,this.cellSize,this.cellSize);
-        this.ctx.fillText('P2: '+this.player2.score,this.cellSize,this.cellSize*2);
-        this.ctx.fillText('P3: '+this.player3.score,this.cellSize,this.cellSize*3);
-        this.ctx.fillText('P1: '+this.player4.score,this.cellSize,this.cellSize*4);
-    }
+    
     checkCollision(a,b){
         return a.x===b.x&&a.y===b.y;
     }
@@ -77,17 +82,21 @@ class Game{
     }
     render(deltaTime){ 
         this.handlePeriodicEvents(deltaTime);
-        if(this.eventUpdate)
+        if(this.eventUpdate && !this.gameOver)
         {
             this.ctx.clearRect(0,0,this.width,this.height);
+            this.background.draw();
             this.drawGrid();
         //this.ctx.fillStyle='blue';
             this.gameObjects.forEach(object=>{
                 object.draw();
                 object.update();
             })
-            this.drawStatusText();
+
+            this.gameUi.update();
+            
         }
+        
     }
 }
 
